@@ -34,6 +34,7 @@ func main() {
 			} else {
 				log.Println("Stop...")
 				s.Stop()
+				return
 			}
 		}
 	}(s)
