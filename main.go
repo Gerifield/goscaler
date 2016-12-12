@@ -2,18 +2,42 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/gerifield/scaler"
+	"github.com/gerifield/goscaler/scaler"
 )
 
 func main() {
+	sigs := make(chan os.Signal, 1)
 
-	conf, err := scaler.LoadConfig("config.yaml")
+	signal.Notify(sigs, syscall.SIGUSR2, syscall.SIGINT, syscall.SIGKILL)
+	s := scaler.NewScaler("config.yaml")
+	err := s.LoadConfig()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	s := NewScaler(conf)
-	s.Run()
+	// Config reload listener
+	go func(s *scaler.Scaler) {
+		sig := <-sigs
+		if sig == syscall.SIGUSR2 {
+			log.Println("Reload config")
+			err := s.LoadConfig()
+			if err != nil {
+				log.Println(err)
+				s.Stop()
+			}
+		} else {
+			log.Println("Stop...")
+			s.Stop()
+		}
+	}(s)
+
+	err = s.Run()
+	if err != nil {
+		log.Println(err)
+	}
 }

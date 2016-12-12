@@ -2,16 +2,18 @@ package scaler
 
 import (
 	"io/ioutil"
+	"time"
 
 	"github.com/garyburd/redigo/redis"
 	"gopkg.in/yaml.v2"
 )
 
 type ConfigFile struct {
-	RedisServer string       `yaml:"redisServer"`
-	QueueName   string       `yaml:"queueName"`
-	DockerImage string       `yaml:"dockerImage"`
-	ScaleRanges []ScaleRange `yaml:"ranges"`
+	RedisServer  string       `yaml:"redisServer"`
+	QueueName    string       `yaml:"queueName"`
+	DockerImage  string       `yaml:"dockerImage"`
+	SleepTimeout string       `yaml:"sleepTimeout"`
+	ScaleRanges  []ScaleRange `yaml:"ranges"`
 }
 
 type ScaleRange struct {
@@ -21,10 +23,11 @@ type ScaleRange struct {
 }
 
 type Config struct {
-	Redis       *redis.Pool
-	QueueName   string
-	DockerImage string
-	ScaleRanges []ScaleRange
+	Redis        *redis.Pool
+	QueueName    string
+	DockerImage  string
+	ScaleRanges  []ScaleRange
+	SleepTimeout time.Duration
 }
 
 func LoadConfig(file string) (*Config, error) {
@@ -40,12 +43,17 @@ func LoadConfig(file string) (*Config, error) {
 	}
 
 	pool := newPool(conf.RedisServer, "")
+	dur, err := time.ParseDuration(conf.SleepTimeout)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Config{
-		Redis:       pool,
-		QueueName:   conf.QueueName,
-		DockerImage: conf.DockerImage,
-		ScaleRanges: conf.ScaleRanges,
+		Redis:        pool,
+		QueueName:    conf.QueueName,
+		DockerImage:  conf.DockerImage,
+		ScaleRanges:  conf.ScaleRanges,
+		SleepTimeout: dur,
 	}, nil
 }
 
@@ -54,9 +62,9 @@ func newPool(server, password string) *redis.Pool {
 		MaxIdle:     10,
 		MaxActive:   60,
 		IdleTimeout: 240 * time.Second,
-		Wait:        true, // Wait for the connection pool, no connection pool exhausted error
+		Wait:        true,
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", server, redis.DialConnectTimeout(5*time.Second), redis.DialReadTimeout(5*time.Second), redis.DialReadTimeout(5*time.Second))
+			c, err := redis.Dial("tcp", server, redis.DialConnectTimeout(10*time.Second), redis.DialReadTimeout(10*time.Second), redis.DialWriteTimeout(10*time.Second))
 			if err != nil {
 				return nil, err
 			}

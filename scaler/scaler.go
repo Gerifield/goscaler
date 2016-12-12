@@ -1,15 +1,63 @@
 package scaler
 
+import (
+	"sync"
+	"time"
+)
+
 type Scaler struct {
-	Config *Config
+	configFile string
+
+	configLock *sync.Mutex
+	config     *Config
+
+	stopChan chan struct{}
 }
 
-func NewScaler(c *Config) *Scaler {
+func NewScaler(c string) *Scaler {
 	return &Scaler{
-		Config: c,
+		configFile: c,
+		configLock: &sync.Mutex{},
+		stopChan:   make(chan struct{}),
 	}
 }
 
-func (s *Scaler) Run() {
+func (s *Scaler) LoadConfig() error {
+	c, err := LoadConfig(s.configFile)
+	if err != nil {
+		return err
+	}
+	s.configLock.Lock()
+	s.config = c
+	s.configLock.Unlock()
+	return nil
+}
 
+func (s *Scaler) getConfig() *Config {
+	s.configLock.Lock()
+	defer s.configLock.Unlock()
+	return s.config
+}
+
+func (s *Scaler) Run() error {
+	var err error
+	for {
+		select {
+		case <-s.stopChan:
+			return nil
+		case <-time.After(s.getConfig().SleepTimeout):
+			err = s.doAction()
+			if err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func (s *Scaler) Stop() {
+	close(s.stopChan)
+}
+
+func (s *Scaler) doAction() error {
+	return nil
 }

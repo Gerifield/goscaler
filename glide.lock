@@ -1,8 +1,11 @@
 hash: e94f9c6e0a127cdef6c339bb2cbac0c926e1fd44c2026a9af50ef3eddfc36972
-updated: 2016-12-12T16:02:40.79463844+01:00
+updated: 2016-12-12T16:30:35.253604416+01:00
 imports:
 - name: github.com/garyburd/redigo
   version: 8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13
+  subpackages:
+  - internal
+  - redis
 - name: gopkg.in/yaml.v2
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
 testImports: []
