@@ -11,8 +11,8 @@ import (
 type ConfigFile struct {
 	RedisServer  string       `yaml:"redisServer"`
 	QueueName    string       `yaml:"queueName"`
-	DockerImage  string       `yaml:"dockerImage"`
 	SleepTimeout string       `yaml:"sleepTimeout"`
+	DockerImage  string       `yaml:"dockerImage"`
 	ScaleRanges  []ScaleRange `yaml:"ranges"`
 }
 
@@ -23,11 +23,12 @@ type ScaleRange struct {
 }
 
 type Config struct {
-	Redis        *redis.Pool
-	QueueName    string
-	DockerImage  string
-	ScaleRanges  []ScaleRange
-	SleepTimeout time.Duration
+	Redis           *redis.Pool
+	QueueName       string
+	DockerImage     string
+	PrevDockerImage string
+	SleepTimeout    time.Duration
+	ScaleRanges     []ScaleRange
 }
 
 func LoadConfig(file string) (*Config, error) {

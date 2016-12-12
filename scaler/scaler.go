@@ -27,8 +27,11 @@ func (s *Scaler) LoadConfig() error {
 	if err != nil {
 		return err
 	}
+
 	s.configLock.Lock()
+	prevImg := s.config.DockerImage // Save the prev. image
 	s.config = c
+	s.config.PrevDockerImage = prevImg // put it back
 	s.configLock.Unlock()
 	return nil
 }
