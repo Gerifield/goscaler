@@ -9,11 +9,11 @@ import (
 )
 
 type ConfigFile struct {
-	RedisServer  string       `yaml:"redisServer"`
-	QueueName    string       `yaml:"queueName"`
-	SleepTimeout string       `yaml:"sleepTimeout"`
-	DockerImage  string       `yaml:"dockerImage"`
-	ScaleRanges  []ScaleRange `yaml:"ranges"`
+	RedisServer  string            `yaml:"redisServer"`
+	QueueName    string            `yaml:"queueName"`
+	SleepTimeout string            `yaml:"sleepTimeout"`
+	DockerImage  DockerImageConfig `yaml:"dockerImage"`
+	ScaleRanges  []ScaleRange      `yaml:"ranges"`
 }
 
 type ScaleRange struct {
@@ -23,12 +23,22 @@ type ScaleRange struct {
 }
 
 type Config struct {
-	Redis           *redis.Pool
-	QueueName       string
-	DockerImage     string
-	PrevDockerImage string
-	SleepTimeout    time.Duration
-	ScaleRanges     []ScaleRange
+	Redis               *redis.Pool
+	QueueName           string
+	DockerImage         DockerImageConfig
+	PrevDockerImageName string
+	SleepTimeout        time.Duration
+	ScaleRanges         []ScaleRange
+}
+
+type DockerImageConfig struct {
+	Name          string   `yaml:"name"`
+	Command       string   `yaml:"command"`
+	NetworkMode   string   `yaml:"networkMode"`
+	Volumes       []string `yaml:"volumes"`
+	RestartPolicy string   `yaml:"restartPolicy"`
+	Repo          string   `yaml:"repo"`
+	RunningName   string   `yaml:"runningName"`
 }
 
 func LoadConfig(file string) (*Config, error) {
