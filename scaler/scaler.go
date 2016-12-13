@@ -11,6 +11,8 @@ import (
 
 	"github.com/docker/docker/api/types"
 	//"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 )
 
@@ -132,9 +134,9 @@ func (s *Scaler) startContainers(runningNum, num int) {
 func (s *Scaler) startContainer(index int) error {
 	//s.dockerClient.ContainerCreate(
 	//	context.Background(),
-	//	config,
-	//	hostConfig,
-	//	networkingConfig,
+	//	container.Config{},
+	//	container.HostConfig{},
+	//	network.NetworkingConfig{},
 	//	fmt.Sprintf("%s-%d", s.config.DockerImage.RunningName, index),
 	//)
 	return nil
